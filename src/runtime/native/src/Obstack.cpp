@@ -495,7 +495,7 @@ void ObstackDetail::printMemoryStatistics(Obstack& obstack) const {
 void ObstackDetail::printObjectSize(const RObj* o) const {
   size_t total = 0;
   folly::small_vector<const RObj*, 8> pending;
-  skip::fast_set<const RObj*> seen;
+  std::set<const RObj*> seen;
   seen.insert(o);
   pending.push_back(o);
   while (!pending.empty()) {
@@ -1110,7 +1110,7 @@ struct ObstackDetail::Collector {
   // copied: objects in the set are considered marked. We only insert objects
   // that we can't mark some other way: either a forwarding pointer or
   // temporarily setting m_pos=markPos().
-  skip::fast_set<void*> m_marked;
+  std::set<void*> m_marked;
 
   Collector(Obstack& obstack, SkipObstackPos note, CollectMode mode)
       : m_obstack(obstack),

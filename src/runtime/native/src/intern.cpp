@@ -527,7 +527,7 @@ static IObj* findEqualPredecessor(IObj& iobj, IObj& cycleMember) {
   assert(&cycleMember != &cycleHandle);
 
   // Objects already processed or pushed on the stack.
-  skip::fast_set<IObj*> seen{&cycleMember};
+  std::set<IObj*> seen{&cycleMember};
 
   for (std::vector<IObj*> stack{&cycleMember}; !stack.empty();) {
     // Pop the next member of the cycle to try.
@@ -629,7 +629,7 @@ static void recordInternMapping(IObj& dup, IObj& canonical) {
 }
 
 static bool findEqualNeighbor(TarjanNode& sccList) {
-  skip::fast_set<IObj*> cyclesSeen;
+  std::set<IObj*> cyclesSeen;
 
   for (TarjanNode* n = &sccList; n != nullptr; n = n->m_next) {
     if (n->m_pointsToInternedCycle) {
@@ -662,7 +662,7 @@ using HashIObjPair = boost::hash<std::pair<IObj*, IObj*>>;
  * Since equality is symmetric, we canonicalize each pair by putting the
  * pointer at the lower address first.
  */
-using IObjPairSet = skip::fast_set<std::pair<IObj*, IObj*>, HashIObjPair>;
+using IObjPairSet = std::unordered_set<std::pair<IObj*, IObj*>, HashIObjPair>;
 
 /**
  * Helper function for deepCompare():

@@ -3777,7 +3777,7 @@ void Transaction::abort() {
 
 std::unique_lock<std::mutex> Transaction::commitWithoutUnlock(
     std::vector<InvalidationWatcher::Ptr>& invalidationWatchersToNotify) {
-  skip::fast_set<Invocation*> noOpAssigned;
+  std::set<Invocation*> noOpAssigned;
   bool changed = false;
 
   std::unique_lock<std::mutex> commitLock{s_txnMutex};

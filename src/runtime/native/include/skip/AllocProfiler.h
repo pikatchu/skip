@@ -169,7 +169,7 @@ struct AllocProfiler {
   static bool s_profilerEnabled;
 
   static std::mutex s_sharedStateMutex;
-  static skip::fast_set<AllocProfiler*> s_instances;
+  static std::set<AllocProfiler*> s_instances;
   static ObstackAllocLog s_sharedLog;
 };
 } // namespace skip
