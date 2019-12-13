@@ -489,7 +489,7 @@ static size_t computeLocalHash(IObj& iobj) {
 }
 
 /// Maps each computeLocalHash() to a linked list of TarjanNodes with that hash.
-using HashToNodeListMap = skip::fast_map<size_t, TarjanNode*>;
+using HashToNodeListMap = std::map<size_t, TarjanNode*>;
 
 /**
  * Partition nodes into linked lists by their computeLocalHash() values.
@@ -988,7 +988,7 @@ static void internComplexScc(TarjanNode& sccList) {
 IObj* partitionIntoSccsAndIntern(const RObj& root) {
   // Can't use skip::fast_map<> because we need the location of the values
   // to survive a rehash. TarjanNode::m_next and m_prev form useful lists.
-  skip::node_map<const RObj*, TarjanNode> objToNode;
+  std::unordered_map<const RObj*, TarjanNode> objToNode;
 
   // stack of pending refs to visit for the TarjanNodes in the scc stack.
   // Each recursion into a new node pushes refs in that node. They will be

@@ -48,9 +48,9 @@ struct ReactiveGlobalCache {
  private:
   // using node_map because Cell is noncopyable.
   using KeyType = std::pair<int64_t, std::string>;
-  skip::node_map<KeyType, Cell> m_cells;
+  std::unordered_map<KeyType, Cell> m_cells;
 
-  skip::node_map<KeyType, Cell>::iterator constructEmptyCell(KeyType key) {
+  std::unordered_map<KeyType, Cell>::iterator constructEmptyCell(KeyType key) {
     return m_cells
         .emplace(
             std::piecewise_construct,

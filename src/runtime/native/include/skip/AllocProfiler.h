@@ -72,11 +72,11 @@ using SymbolicAllocSite = std::pair<SymbolicCallStack, K>;
 
 // For each AllocSite, we'll simply log number of calls:
 template <typename K, typename V>
-using AllocLog = skip::fast_map<AllocSite<K>, V, boost::hash<AllocSite<K>>>;
+using AllocLog = std::unordered_map<AllocSite<K>, V, boost::hash<AllocSite<K>>>;
 
 template <typename K, typename V>
 using SymbolicAllocLog =
-    skip::fast_map<SymbolicAllocSite<K>, V, boost::hash<SymbolicAllocSite<K>>>;
+    std::unordered_map<SymbolicAllocSite<K>, V, boost::hash<SymbolicAllocSite<K>>>;
 
 using ObstackAllocLog = AllocLog<size_t, uint64_t>;
 using ObstackSymbolicAllocLog = SymbolicAllocLog<size_t, uint64_t>;

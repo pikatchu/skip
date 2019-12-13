@@ -1761,7 +1761,7 @@ struct Freezer : BasicDeepCopyHelper<
   }
 
  private:
-  skip::fast_map<RObj*, RObj*> m_copyMap;
+  std::map<RObj*, RObj*> m_copyMap;
 
   friend struct DeepCopyHelper;
   friend struct BasicDeepCopyHelper;
@@ -2088,7 +2088,7 @@ void ObstackDetail::ChunkAllocator::collectGarbage() {
 
   // Count the number of chunks in each slab and if we have an entire free slab
   // then we free it up.
-  skip::fast_map<Slab*, int> slabFreeChunkCount;
+  std::map<Slab*, int> slabFreeChunkCount;
 
   for (ssize_t index = (ssize_t)m_freelist.size() - 1; index >= 0; --index) {
     Slab* slab = Slab::fromChunk(m_freelist[index]);

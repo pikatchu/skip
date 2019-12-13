@@ -1450,7 +1450,7 @@ struct Context final : Aligned<Context>, LeakChecker<Context> {
   // These are strong pointers (hold a reference).
   //
   // Protected by m_mutex (which is different than m_placeholder.mutex()).
-  using CallSet = skip::fast_map<Revision*, size_t>;
+  using CallSet = std::map<Revision*, size_t>;
   CallSet m_calls;
 
   // NOTE: This is separate from m_placeholder::mutex to simplify the lock

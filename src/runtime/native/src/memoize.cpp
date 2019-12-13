@@ -2139,7 +2139,7 @@ void SubscriptionSet::verifyInvariants(const Revision& owner) const {
     assert(head->m_subs[0].isSubArray());
 
     // SubArray -> bit mask of which slots are free.
-    skip::fast_map<SubArray*, uint16_t> freeSlots;
+    std::map<SubArray*, uint16_t> freeSlots;
     static_assert(SubArray::size() <= sizeof(uint16_t) * 8, "");
 
     // Total number of freelist entries encountered.
@@ -4576,7 +4576,7 @@ enum Tag {
 // index.
 template <typename Tk>
 struct IndexMap {
-  using map_type = fast_map<Tk, size_t>;
+  using map_type = std::map<Tk, size_t>;
   using value_type = typename map_type::value_type;
   using iterator = typename map_type::iterator;
   using const_iterator = typename map_type::const_iterator;
