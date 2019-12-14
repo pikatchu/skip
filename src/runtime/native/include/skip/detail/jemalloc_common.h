@@ -34,8 +34,8 @@ struct Mib {
     assert(m_size <= MAX_MIB_SIZE);
     int res = ::mallctlnametomib(name, &m_parts[0], &m_size);
     if (res) {
-      std::string s = folly::sformat("mallctlnametomib({}) failed", name);
-      throw std::runtime_error(s);
+      std::string s("mallctlnametomib(");
+      throw std::runtime_error(s + name + ") failed");
     }
   }
 
@@ -80,9 +80,9 @@ void mallctl_by_mib(
   int res = ::mallctlbymib(
       mibx.m_parts.data(), mibx.m_size, oldp, oldlenp, (void*)newp, newlen);
   if (res) {
-    std::string s =
-        folly::sformat("mallctlbymib({}) failed, errno = {}", mibx.m_name, res);
-    throw std::runtime_error(s);
+    std::string s("mallctlbymib(");
+    std::string s2(") failed, errno = ");
+    throw std::runtime_error(s + mibx.m_name + s2 + std::to_string(res));
   }
 }
 
