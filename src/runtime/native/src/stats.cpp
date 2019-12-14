@@ -9,8 +9,6 @@
 
 #include <iostream>
 
-#include <folly/json.h>
-
 namespace skip {
 
 void dumpInternSiteLogInfo(
@@ -82,8 +80,6 @@ void ObjectStats::dump(std::ostream& out, bool sortByCount) {
 
   // Dump out in JSON format.
 
-  folly::json::serialization_opts opts;
-
   out << "[\n";
   for (const auto& c : counters) {
     out << "  {";
@@ -95,9 +91,8 @@ void ObjectStats::dump(std::ostream& out, bool sortByCount) {
       out << " \"count\": " << c.second.m_count;
     }
 
-    std::string typeName;
-    folly::json::escapeString(c.first, typeName, opts);
-    out << " \"type\": " << typeName;
+    // TODO: escape c.first if we really want well-formed JSON (Do we care?).
+    out << " \"type\": " << c.first;
 
     out << " }\n";
   }
