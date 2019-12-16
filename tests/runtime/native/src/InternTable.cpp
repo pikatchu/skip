@@ -23,14 +23,10 @@ InternTable& getInternTable() {
   return s_internTable;
 }
 
-// ??? Stolen from MicroLock.h heldBit and waitBit: TODO: Write a test
-// that guarantees these values match folly's.
-
-/// Tag bit in an InternPointer indicating its folly::MicroLock is held.
+/// Tag bit in an InternPointer indicating its lock is held.
 static constexpr uint32_t kHeld = 0x1;
 
-/// Tag bit in an InternPointer indicating some thread is waiting for
-/// its folly::MicroLock.
+/// Tag bit in an InternPointer indicating some thread is waiting.
 static constexpr uint32_t kWait = 0x2;
 
 /// All lock bits ORed together.
@@ -92,7 +88,25 @@ struct Bucket : private boost::noncopyable {
 
   Bucket& operator=(const Bucket& other) = delete;
 
+  void lock() {
+    m_lock.lock();
+    auto oldBits = m_atomic.lo.load();
+    auto bits = oldBits | kLockBitsMask;
+    const auto newBits = (uint32_t)bits;
+
+    m_atomic.lo.store(
+      newBits,
+      std::memory_order_acquire);
+  }
+
   void unlock() {
+    auto oldBits = m_atomic.lo.load();
+    auto bits = oldBits & ~kLockBitsMask;
+    const auto newBits = (uint32_t)bits;
+
+    m_atomic.lo.store(
+      newBits,
+      std::memory_order_release);
     m_lock.unlock();
   }
 
@@ -203,7 +217,7 @@ struct Bucket : private boost::noncopyable {
     //     accesses a semaphore using a word access, other processors
     //     should not access the semaphore using a byte access.
     //
-    // Since the folly::MicroLock code uses 32-bit atomic operations
+    // Since the lock code uses 32-bit atomic operations
     // (implied by its use of futex under the covers), we will too, even
     // though we want to update all 64 bits. This probably is not needed.
 
@@ -213,7 +227,7 @@ struct Bucket : private boost::noncopyable {
     const uintptr_t newBits = newv.bits() & ~kLockBitsMask;
     m_atomic.hi = newBits >> 32;
 
-    // Both write out our new value and release the folly lock
+    // Both write out our new value and release the lock
     // in a single atomic operation, if possible. We could write out just our
     // bits using something like an atomic add that simultaneously subtracts out
     // the non-lock low bits that were previously there and adds in the bits
@@ -233,9 +247,8 @@ struct Bucket : private boost::noncopyable {
       // Set our pointer bits, leaving the lock bits alone (i.e. both set).
       m_atomic.lo.store(newlo | (kHeld | kWait), std::memory_order_relaxed);
 
-      // Let MicroLock do the hard unlocking + waking work.
-      unlock();
     }
+    unlock();
   }
 
   union {
@@ -250,10 +263,8 @@ struct Bucket : private boost::noncopyable {
 
       uint32_t hi;
     } m_atomic;
-
-    // NOTE: This placement assumes little-endian.
-    folly::MicroLock m_lock;
   };
+  std::mutex m_lock;
 };
 
 /**
@@ -314,7 +325,7 @@ InternTable::~InternTable() {
 
 Bucket& InternTable::lockBucketIndex(size_t slot) {
   Bucket& b = m_buckets[slot];
-  b.m_lock.lock();
+  b.lock();
 
   if (UNLIKELY(b.m_ptr.isLazyRehashSentinel())) {
     rehash(slot);
@@ -513,7 +524,7 @@ size_t InternTable::verifyInvariants() const {
       continue;
     }
 
-    b.m_lock.lock();
+    b.lock();
 
     // Figure out which bits of the hash we definitely know given that
     // objects are stored in this bucket.
@@ -549,7 +560,7 @@ size_t InternTable::verifyInvariants() const {
 
     longestCollisionList = std::max(longestCollisionList, listLength);
 
-    b.m_lock.unlock();
+    b.unlock();
   }
 
   return longestCollisionList;

@@ -32,7 +32,6 @@
 #include <vector>
 #include <array>
 
-#include <folly/small_vector.h>
 #include <folly/Format.h>
 #include <folly/ClockGettimeWrappers.h>
 
@@ -494,8 +493,8 @@ void ObstackDetail::printMemoryStatistics(Obstack& obstack) const {
 
 void ObstackDetail::printObjectSize(const RObj* o) const {
   size_t total = 0;
-  folly::small_vector<const RObj*, 8> pending;
-  skip::fast_set<const RObj*> seen;
+  std::vector<const RObj*> pending;
+  std::set<const RObj*> seen;
   seen.insert(o);
   pending.push_back(o);
   while (!pending.empty()) {
@@ -939,7 +938,7 @@ void ObstackDetail::sweepIObjs(Obstack& obstack, Pos markPos, Pos collectNote) {
   // alive have had their m_position changed but were not moved in the chain.
 
   // list of IObj* we will decref after re-positioning marked refs.
-  folly::small_vector<IObj*, 4> pendingDecrefs;
+  std::vector<IObj*> pendingDecrefs;
 
   // We've been putting marked IObjs at markPos(). Once we see
   // anything older than that we can stop.
@@ -1098,9 +1097,7 @@ struct ObstackDetail::Collector {
     WorkItem(RObj* target, Type& type) : m_target(target), m_type(&type) {}
   };
 
-  // TODO do stats on this queue size justify small_vecotor? chunked list,
-  // dequeue, or plain vector might be better depending on size distribution.
-  folly::small_vector<WorkItem, 8> m_workQueue;
+  std::vector<WorkItem> m_workQueue;
 
   // When copying, this data is used instead of the actual chunk for
   // the first chunk (which is shared between old and young objects).
@@ -1110,7 +1107,7 @@ struct ObstackDetail::Collector {
   // copied: objects in the set are considered marked. We only insert objects
   // that we can't mark some other way: either a forwarding pointer or
   // temporarily setting m_pos=markPos().
-  skip::fast_set<void*> m_marked;
+  std::set<void*> m_marked;
 
   Collector(Obstack& obstack, SkipObstackPos note, CollectMode mode)
       : m_obstack(obstack),
@@ -1609,7 +1606,7 @@ struct DelayedWorkQueue {
     WorkItem(RObj& target, Type& type) : m_target(&target), m_type(&type) {}
   };
 
-  folly::small_vector<WorkItem, 8> m_queue;
+  std::vector<WorkItem> m_queue;
 
   Derived& derived() {
     return *static_cast<Derived*>(this);
@@ -1761,7 +1758,7 @@ struct Freezer : BasicDeepCopyHelper<
   }
 
  private:
-  skip::fast_map<RObj*, RObj*> m_copyMap;
+  std::map<RObj*, RObj*> m_copyMap;
 
   friend struct DeepCopyHelper;
   friend struct BasicDeepCopyHelper;
@@ -2088,7 +2085,7 @@ void ObstackDetail::ChunkAllocator::collectGarbage() {
 
   // Count the number of chunks in each slab and if we have an entire free slab
   // then we free it up.
-  skip::fast_map<Slab*, int> slabFreeChunkCount;
+  std::map<Slab*, int> slabFreeChunkCount;
 
   for (ssize_t index = (ssize_t)m_freelist.size() - 1; index >= 0; --index) {
     Slab* slab = Slab::fromChunk(m_freelist[index]);

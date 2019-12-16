@@ -48,9 +48,9 @@ struct ReactiveGlobalCache {
  private:
   // using node_map because Cell is noncopyable.
   using KeyType = std::pair<int64_t, std::string>;
-  skip::node_map<KeyType, Cell> m_cells;
+  std::unordered_map<KeyType, Cell> m_cells;
 
-  skip::node_map<KeyType, Cell>::iterator constructEmptyCell(KeyType key) {
+  std::unordered_map<KeyType, Cell>::iterator constructEmptyCell(KeyType key) {
     return m_cells
         .emplace(
             std::piecewise_construct,
@@ -60,21 +60,23 @@ struct ReactiveGlobalCache {
   }
 };
 
-folly::Synchronized<ReactiveGlobalCache, std::mutex>::LockedPtr
-getReactiveGlobalCache() {
-  static folly::Synchronized<ReactiveGlobalCache, std::mutex> s_global;
-  return s_global.lock();
+static std::mutex s_lock;
+ReactiveGlobalCache* getReactiveGlobalCache() {
+  static ReactiveGlobalCache s_global;
+  return &s_global;
 }
 
 thread_local Transaction* t_currentTransaction;
 } // anonymous namespace
 
 SkipInt SKIP_Reactive_nextReactiveGlobalCacheID() {
+  std::lock_guard<std::mutex> guard(s_lock);
   auto locked = getReactiveGlobalCache();
   return locked->m_nextID++;
 }
 
 void SKIP_Reactive_reactiveGlobalCacheSet(SkipInt id, String key, RObj* value) {
+  std::lock_guard<std::mutex> guard(s_lock);
   auto locked = getReactiveGlobalCache();
   if (auto txn = t_currentTransaction) {
     locked->set(*txn, id, key, value);
@@ -85,6 +87,7 @@ void SKIP_Reactive_reactiveGlobalCacheSet(SkipInt id, String key, RObj* value) {
 }
 
 IObj* SKIP_Reactive_reactiveGlobalCacheGet(SkipInt id, String key) {
+  std::lock_guard<std::mutex> guard(s_lock);
   auto locked = getReactiveGlobalCache();
   return locked->get(id, key);
 }
@@ -108,6 +111,7 @@ void SKIP_Reactive_withTransaction(RObj* callback) {
 }
 
 void Reactive::shutdown() {
+  std::lock_guard<std::mutex> guard(s_lock);
   getReactiveGlobalCache()->cleanup();
 }
 

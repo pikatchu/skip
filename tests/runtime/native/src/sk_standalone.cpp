@@ -132,6 +132,5 @@ int main(int argc, char** argv) {
     // no-op
   }
   skip::assertLeakCountersZero();
-
-  return status;
+  std::quick_exit(status);
 }

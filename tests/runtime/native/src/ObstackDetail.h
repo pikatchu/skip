@@ -345,7 +345,7 @@ struct ObstackDetail final : private boost::noncopyable {
 
   // This map is used to ensure that we don't inc/dec more than
   // once for each iobj.
-  skip::fast_map<IObj*, IObjRef> m_iobjRefs;
+  std::map<IObj*, IObjRef> m_iobjRefs;
 
   // This records the notes from the start of the obstack up to and including
   // the note most recently passed to collect().

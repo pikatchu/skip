@@ -13,9 +13,6 @@
 #include "skip/SmallTaggedPtr.h"
 #include "skip/util.h"
 
-#include <folly/Synchronized.h>
-#include <folly/Format.h>
-
 #include <algorithm>
 #include <map>
 #include <stdexcept>
@@ -60,11 +57,10 @@ struct State final {
   }
 };
 
-using SynchState = folly::Synchronized<State, std::mutex>;
-
-SynchState::LockedPtr lockState() {
+std::mutex g_stateMutex;
+State getState() {
   static SynchState s_state;
-  return s_state.lock();
+  return s_state;
 }
 
 std::map<const void*, MemInfo>::iterator _findMemBlock(
@@ -89,7 +85,8 @@ std::map<const void*, MemInfo>::iterator _findMemBlock(
 }
 
 MemInfo _clearMemoryKind(const void* p) {
-  auto lockedState = lockState();
+  std::lock_guard<std::mutex> lock{g_stateMutex};
+  auto lockedState = getState();
   auto i = _findMemBlock(*lockedState, const_cast<void*>(p));
   auto res = i->second;
   lockedState->m_known.erase(i);
@@ -102,7 +99,8 @@ void _setMemoryKind(
     bool managed,
     int offset,
     Arena::Kind kind) {
-  auto lockedState = lockState();
+  std::lock_guard<std::mutex> lock{g_stateMutex};
+  auto lockedState = getState();
   lockedState->m_known.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(p),
@@ -136,7 +134,8 @@ void Arena::free(void* p, Kind /*kind*/) {
 }
 
 Arena::Kind Arena::rawMemoryKind(const void* p) {
-  auto lockedState = lockState();
+  std::lock_guard<std::mutex> lock{g_stateMutex};
+  auto lockedState = getState();
   if (lockedState->m_known.empty())
     return Arena::Kind::unknown;
   auto i = lockedState->m_known.upper_bound(p);

@@ -91,7 +91,7 @@ void AllocProfiler::logAllocation(size_t sz) {
  * and merge any remaining live instances at exit time.
  */
 std::mutex AllocProfiler::s_sharedStateMutex;
-skip::fast_set<AllocProfiler*> AllocProfiler::s_instances;
+std::set<AllocProfiler*> AllocProfiler::s_instances;
 ObstackAllocLog AllocProfiler::s_sharedLog;
 
 AllocProfiler::AllocProfiler() : m_allocLog() {

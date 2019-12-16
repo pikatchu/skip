@@ -62,7 +62,7 @@ struct ObjectStats {
   std::mutex m_mutex;
 
   // Type name pointers are interned: just hash & compare the raw pointer.
-  skip::fast_map<const char*, Counters> m_counters;
+  std::map<const char*, Counters> m_counters;
 
   InternAllocLog m_internLog;
 };

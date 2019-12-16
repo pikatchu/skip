@@ -14,9 +14,6 @@
 #include "skip/SmallTaggedPtr.h"
 #include "skip/util.h"
 
-#include <folly/Synchronized.h>
-#include <folly/Format.h>
-
 #include <algorithm>
 #include <map>
 #include <stdexcept>
@@ -48,9 +45,6 @@ constexpr bool isChunkAligned(T p) {
 #if USE_JEMALLOC
 // ----------------------------------------------------------------------
 
-#include <folly/AtomicHashMap.h>
-#include <folly/Memory.h>
-
 #define ARENA_PRIVATE 1
 #include "skip/detail/jemalloc_common.h"
 #if JEMALLOC_VERSION_MAJOR == 4
@@ -75,9 +69,7 @@ struct JeThreadCache {
 
 struct ArenaData : private je::ChunkHooks {
   explicit ArenaData(Arena::Kind kind)
-      : je::ChunkHooks(kind), m_arenaTCache{[]() {
-          return new JeThreadCache{};
-        }} {}
+      : je::ChunkHooks(kind), m_arenaTCache{new JeThreadCache{}} {}
 
   void* alloc(size_t sz, size_t align) _MALLOC_ATTR(1) {
     assert(sz > 0);
@@ -109,14 +101,14 @@ struct ArenaData : private je::ChunkHooks {
   }
 
  private:
-  const folly::ThreadLocal<JeThreadCache> m_arenaTCache;
+  const JeThreadCache* m_arenaTCache;
 };
 
 ArenaData& getDataForKind(Arena::Kind kind) {
-  static ArenaData iobj(Arena::Kind::iobj);
-  static ArenaData large(Arena::Kind::large);
-  static ArenaData obstack(Arena::Kind::obstack);
-  static std::array<ArenaData*, 4> s_dataPerKind{
+  static thread_local ArenaData iobj(Arena::Kind::iobj);
+  static thread_local ArenaData large(Arena::Kind::large);
+  static thread_local ArenaData obstack(Arena::Kind::obstack);
+  static thread_local std::array<ArenaData*, 4> s_dataPerKind{
       {nullptr, &iobj, &large, &obstack}};
 
   return *s_dataPerKind[(int)kind];
