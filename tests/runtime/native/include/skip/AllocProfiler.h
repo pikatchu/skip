@@ -75,8 +75,8 @@ template <typename K, typename V>
 using AllocLog = std::unordered_map<AllocSite<K>, V, boost::hash<AllocSite<K>>>;
 
 template <typename K, typename V>
-using SymbolicAllocLog =
-    std::unordered_map<SymbolicAllocSite<K>, V, boost::hash<SymbolicAllocSite<K>>>;
+using SymbolicAllocLog = std::
+    unordered_map<SymbolicAllocSite<K>, V, boost::hash<SymbolicAllocSite<K>>>;
 
 using ObstackAllocLog = AllocLog<size_t, uint64_t>;
 using ObstackSymbolicAllocLog = SymbolicAllocLog<size_t, uint64_t>;

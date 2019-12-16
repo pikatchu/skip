@@ -3426,7 +3426,6 @@ findOrCreateLockedCleanupList(TxnId txn) {
   if (LIKELY(it != s_cleanupLists.end())) {
     cl = &it->second;
   } else {
-
     // We need to refresh queryTxn since we released the lock temporarily.
     queryTxn = txn ? txn : newestVisibleTxn();
 

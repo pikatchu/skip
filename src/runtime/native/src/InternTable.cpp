@@ -94,9 +94,7 @@ struct Bucket : private boost::noncopyable {
     auto bits = oldBits | kLockBitsMask;
     const auto newBits = (uint32_t)bits;
 
-    m_atomic.lo.store(
-      newBits,
-      std::memory_order_acquire);
+    m_atomic.lo.store(newBits, std::memory_order_acquire);
   }
 
   void unlock() {
@@ -104,9 +102,7 @@ struct Bucket : private boost::noncopyable {
     auto bits = oldBits & ~kLockBitsMask;
     const auto newBits = (uint32_t)bits;
 
-    m_atomic.lo.store(
-      newBits,
-      std::memory_order_release);
+    m_atomic.lo.store(newBits, std::memory_order_release);
     m_lock.unlock();
   }
 
@@ -246,7 +242,6 @@ struct Bucket : private boost::noncopyable {
 
       // Set our pointer bits, leaving the lock bits alone (i.e. both set).
       m_atomic.lo.store(newlo | (kHeld | kWait), std::memory_order_relaxed);
-
     }
     unlock();
   }
