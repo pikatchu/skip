@@ -16,8 +16,6 @@
 #include <memory>
 #include <cstdlib>
 
-#include <boost/noncopyable.hpp>
-
 namespace skip {
 
 struct RObj;

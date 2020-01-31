@@ -12,7 +12,6 @@
 #include "set.h"
 
 #include <utility>
-#include <boost/noncopyable.hpp>
 
 namespace skip {
 

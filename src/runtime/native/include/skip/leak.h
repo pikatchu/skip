@@ -12,8 +12,6 @@
 #include <atomic>
 #include <typeinfo>
 
-#include <boost/noncopyable.hpp>
-
 namespace skip {
 
 #if SKIP_PARANOID

@@ -18,7 +18,6 @@
 #include <memory>
 
 #include <boost/intrusive_ptr.hpp>
-#include <boost/noncopyable.hpp>
 
 namespace skip {
 
