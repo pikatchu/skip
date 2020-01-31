@@ -24,7 +24,6 @@
 #include "skip/util.h"
 
 #include <boost/io/ios_state.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/version.hpp>
 #include <shared_mutex>
 

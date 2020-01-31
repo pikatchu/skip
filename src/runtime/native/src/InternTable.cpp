@@ -15,8 +15,6 @@
 #include <sys/mman.h>
 #include <thread>
 
-#include <boost/noncopyable.hpp>
-
 namespace skip {
 
 InternTable& getInternTable() {
