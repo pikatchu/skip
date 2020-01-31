@@ -64,7 +64,7 @@ const void* lockKey(const T& val) {
 
 // RAII lock guard, created by calling lockify().
 template <typename T>
-struct LockGuard final : private boost::noncopyable {
+struct LockGuard final : private skip::noncopyable {
   LockGuard() = default;
 
   ~LockGuard() {
@@ -153,7 +153,7 @@ struct LockGuard final : private boost::noncopyable {
  *
  * It also allows some work to be deferred until no locks are held.
  */
-class ThreadLocalLockManager final : private boost::noncopyable {
+class ThreadLocalLockManager final : private skip::noncopyable {
   friend ThreadLocalLockManager& lockManager();
 
   template <typename T>

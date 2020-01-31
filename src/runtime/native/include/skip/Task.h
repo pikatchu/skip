@@ -8,6 +8,7 @@
 #pragma once
 
 #include "fwd.h"
+#include "util.h"
 
 #include <atomic>
 #include <memory>
@@ -24,7 +25,7 @@ void intrusive_ptr_release(Process* p);
 using ProcessPtr = boost::intrusive_ptr<Process>;
 
 // Work that a Process can be asked to do.
-struct Task : private boost::noncopyable {
+struct Task : private skip::noncopyable {
   virtual ~Task() = default;
   virtual void run() = 0;
 
@@ -52,7 +53,7 @@ struct LambdaTask final : Task {
 struct OneShotTask final : Task {
   // A first come, first serve guard around the underlying Task we want
   // to run. Many OneShotTasks can point to the same Arbiter.
-  struct Arbiter final : boost::noncopyable {
+  struct Arbiter final : skip::noncopyable {
     using Ptr = boost::intrusive_ptr<Arbiter>;
     static Ptr make(std::unique_ptr<Task> task);
 
