@@ -311,9 +311,9 @@ if [ $command == "build" ]; then
     fi
 
     if [ "$(uname)" == "Darwin" ]; then
-	LIBUNWIND=
+	LIBUNWIND=""
     else
-	LIBUNWIND=subbuild/lib/libunwind.a
+	LIBUNWIND="$installDir/../lib/skip/libunwind.a"
     fi
 
 
@@ -332,18 +332,18 @@ if [ $command == "build" ]; then
 	     -DUSE_JEMALLOC -msse4.2 -std=c++14 \
 	     -O1 -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer \
 	     -fdata-sections -ffunction-sections \
-	     subbuild/lib/libicuuc.a \
-	     subbuild/lib/libicudata.a \
-	     subbuild/lib/libpcre.a \
-	     subbuild/lib/libjemalloc_pic.a \
+	     "$installDir/../lib/skip/libicuuc.a" \
+	     "$installDir/../lib/skip/libicudata.a" \
+	     "$installDir/../lib/skip/libpcre.a" \
+	     "$installDir/../lib/skip/libjemalloc_pic.a" \
 	     -lpthread \
-	     $(LIBUNWIND) \
+	     $LIBUNWIND \
 	     -ldl \
 	     $ccopts
+
+    if [ -f "$skdir/bin.out" ]; then
+	echo "Written: $skdir/bin.out"
     fi
-
-
-    echo "Written: $skdir/bin.out"
 fi
 
 if [ $runAfterBuild ]; then
