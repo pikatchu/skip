@@ -23,7 +23,7 @@ install: build/lkg/bin/skip_to_llvm build/lkg/bin/skip_server build/lkg/bin/skip
 	cp subbuild/lib/libicudata.a $(PREFIX)/lib/skip
 	cp subbuild/lib/libpcre.a $(PREFIX)/lib/skip
 	cp subbuild/lib/libjemalloc_pic.a $(PREFIX)/lib/skip
-	cp subbuild/lib/libunwind.a $(PREFIX)/lib/skip || :
+	cp subbuild/lib/libunwind.a $(PREFIX)/lib/skip 2> /dev/null || :
 	cp sk $(PREFIX)/bin/sk
 	chmod 755 $(PREFIX)/bin/sk
 
