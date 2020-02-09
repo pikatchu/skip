@@ -8,7 +8,7 @@
 #
 
 installDir=$(dirname "${BASH_SOURCE[0]}")
-clangpp=clang++-6.0
+clangpp=clang++
 preamble="$installDir/../lib/skip/preamble.ll"
 standalone="$installDir/../lib/skip/sk_standalone.cpp.o"
 prelude="$installDir/../lib/skip/prelude"
@@ -41,8 +41,6 @@ else
 	fi
     fi
 fi
-
-root=`realpath "$root"`
 
 if [ "$1" == "--args" ]; then
     shift
@@ -317,7 +315,7 @@ if [ $command == "build" ]; then
     fi
 
 
-    "$clangpp" -s -o "$skdir/bin.out" -g \
+    "$clangpp" -o "$skdir/bin.out" -g \
              "$skdir/out1.o" \
              "$skdir/out2.o" \
              "$skdir/out3.o" \
@@ -327,8 +325,6 @@ if [ $command == "build" ]; then
              "$standalone" \
 	     "$skipRuntimeLib" \
 	     -fPIC -DPIC \
-	     -lrt \
-	     -Wl,--gc-sections \
 	     -DUSE_JEMALLOC -msse4.2 -std=c++14 \
 	     -O1 -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer \
 	     -fdata-sections -ffunction-sections \
