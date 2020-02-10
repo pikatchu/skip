@@ -10,7 +10,10 @@ mkdir -p $TPDIR
 rm -f Makefile.config
 touch Makefile.config
 
-CLANG=`which clang`
+if [ -z $CLANG ]; then
+    CLANG=`which clang`
+fi
+
 EXPVERSION=5
 
 if [ -f $CLANG ]; then
@@ -27,7 +30,9 @@ else
     exit 2
 fi
 
-CLANGXX=`which clang++`
+if [ -z $CLANGXX ]; then
+    CLANGXX=`which clang++`
+fi
 
 if [ -f $CLANGXX ]; then
     VERSION=`$CLANGXX --version | grep version | sed 's/[^0-9]*\([0-9]*\).*/\1/'`
@@ -69,7 +74,8 @@ echo "- Building ICU -"
 echo "-------------------------------------------------------------------------------"
 
 export ICUFLAGS="-DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit -DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1 -DU_USING_ICU_NAMESPACE=0 -DU_CHARSET_IS_UTF8=1"
-(cd third-party/icu/src/icu4c/source/ && CPPFLAGS="$ICUFLAGS" CFLAGS="$ICUFLAGS" ./runConfigureICU Linux --disable-shared --enable-static --disable-tests --disable-samples --prefix="$TPDIR")
+(cd third-party/icu/src/icu4c/source/ && \
+  CC=$CLANG CXX=$CLANGXX CPPFLAGS="$ICUFLAGS" CFLAGS="$ICUFLAGS" ./runConfigureICU Linux --disable-shared --enable-static --disable-tests --disable-samples --prefix="$TPDIR")
 (cd third-party/icu/src/icu4c/source/ && make -j 16 && make install)
 (cd third-party/icu/src/icu4c/source/tools/escapesrc/ && rm -f *.o)
 
@@ -118,5 +124,5 @@ if [ "$(uname)" != "Darwin" ]; then
     echo "- Building LIBUNWIND -"
     echo "-------------------------------------------------------------------------------"
 
-    (cd third-party/libunwind && ./autogen.sh && ./configure --prefix="$TPDIR" --disable-minidebuginfo && make -j 16 && make install)
+    (cd third-party/libunwind && ./autogen.sh && CC=$CLANG CXX=$CLANGXX ./configure --prefix="$TPDIR" --disable-minidebuginfo && make -j 16 && make install)
 fi
